@@ -11,12 +11,12 @@ const PIECE_SYMBOLS = {
         [PIECES.KING]: '♔',
     },
     [COLORS.BLACK]: {
-        [PIECES.PAWN]: '♟',
-        [PIECES.ROOK]: '♜',
-        [PIECES.KNIGHT]: '♞',
-        [PIECES.BISHOP]: '♝',
-        [PIECES.QUEEN]: '♛',
-        [PIECES.KING]: '♚',
+        [PIECES.PAWN]: '♙',
+        [PIECES.ROOK]: '♖',
+        [PIECES.KNIGHT]: '♘',
+        [PIECES.BISHOP]: '♗',
+        [PIECES.QUEEN]: '♕',
+        [PIECES.KING]: '♔',
     },
 };
 

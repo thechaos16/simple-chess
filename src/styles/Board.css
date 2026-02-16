@@ -57,6 +57,8 @@
 
 .piece.b {
     color: black;
+    text-shadow: 0px 0px 2px white;
+    /* Outline for visibility on dark squares */
 }
 
 .hint-dot {
