@@ -18,6 +18,10 @@ class Game {
         this.turn = COLORS.WHITE;
         this.history = [];
         this.status = 'PLAYING'; // PLAYING, CHECK, CHECKMATE
+        this.deadPieces = {
+            [COLORS.WHITE]: [], // Captured by White (Black pieces)
+            [COLORS.BLACK]: []  // Captured by Black (White pieces)
+        };
     }
 
     initializeBoard() {
@@ -59,6 +63,10 @@ class Game {
     getTurn() {
         return this.turn;
     }
+    
+    getDeadPieces() {
+        return this.deadPieces;
+    }
 
     // Basic move framework - to be expanded
     move(fromRow, fromCol, toRow, toCol, promotionPieceType = null) {
@@ -99,6 +107,12 @@ class Game {
         if (inCheck) return false;
 
         // 5. Execute move
+        if (target) {
+            // Capture logic
+            // Add target to the *current player's* collection of dead pieces
+            this.deadPieces[this.turn].push(target);
+        }
+
         this.board[toRow][toCol] = piece;
         this.board[fromRow][fromCol] = null;
 
@@ -304,6 +318,10 @@ class Game {
         this.turn = COLORS.WHITE;
         this.history = [];
         this.status = 'PLAYING';
+        this.deadPieces = {
+            [COLORS.WHITE]: [],
+            [COLORS.BLACK]: []
+        };
     }
 }
 

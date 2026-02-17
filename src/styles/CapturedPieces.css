@@ -1,0 +1,21 @@
+.captured-pieces {
+    display: flex;
+    flex-wrap: wrap;
+    width: 200px; /* Adjust as needed */
+    height: 100%;
+    align-content: flex-start;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+}
+
+.captured-piece {
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+}
+
+.captured-piece .piece {
+    font-size: 24px; /* Smaller than board pieces */
+    cursor: default;
+}
