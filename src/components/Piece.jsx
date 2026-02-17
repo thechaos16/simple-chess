@@ -3,20 +3,20 @@ import { PIECES, COLORS } from '../logic/Game';
 
 const PIECE_SYMBOLS = {
     [COLORS.WHITE]: {
-        [PIECES.PAWN]: '♙',
-        [PIECES.ROOK]: '♖',
-        [PIECES.KNIGHT]: '♘',
-        [PIECES.BISHOP]: '♗',
-        [PIECES.QUEEN]: '♕',
-        [PIECES.KING]: '♔',
+        [PIECES.PAWN]: '♙', // Keep pawn as outline
+        [PIECES.ROOK]: '♜',
+        [PIECES.KNIGHT]: '♞',
+        [PIECES.BISHOP]: '♝',
+        [PIECES.QUEEN]: '♛',
+        [PIECES.KING]: '♚',
     },
     [COLORS.BLACK]: {
-        [PIECES.PAWN]: '♙',
-        [PIECES.ROOK]: '♖',
-        [PIECES.KNIGHT]: '♘',
-        [PIECES.BISHOP]: '♗',
-        [PIECES.QUEEN]: '♕',
-        [PIECES.KING]: '♔',
+        [PIECES.PAWN]: '♙', // Keep pawn as outline
+        [PIECES.ROOK]: '♜',
+        [PIECES.KNIGHT]: '♞',
+        [PIECES.BISHOP]: '♝',
+        [PIECES.QUEEN]: '♛',
+        [PIECES.KING]: '♚',
     },
 };
 
