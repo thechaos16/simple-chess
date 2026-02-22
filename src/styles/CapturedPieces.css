@@ -1,10 +1,11 @@
 .captured-pieces {
     display: flex;
     flex-wrap: wrap;
-    width: 200px; /* Adjust as needed */
+    width: 100%;
+    box-sizing: border-box;
     height: 100%;
     align-content: flex-start;
-    padding: 10px;
+    padding: 5px;
     background-color: rgba(0, 0, 0, 0.05);
     border-radius: 8px;
 }

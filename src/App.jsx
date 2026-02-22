@@ -21,6 +21,22 @@ function App() {
     [COLORS.BLACK]: false,
   });
   const [validMoves, setValidMoves] = useState([]);
+  const [selectedSquare, setSelectedSquare] = useState(null);
+
+  useEffect(() => {
+    if (selectedSquare) {
+      const { row, col } = selectedSquare;
+      const piece = board[row][col];
+      if (piece && beginnerModes[piece.color]) {
+        const moves = game.getValidMoves(row, col);
+        setValidMoves(moves);
+      } else {
+        setValidMoves([]);
+      }
+    } else {
+      setValidMoves([]);
+    }
+  }, [selectedSquare, beginnerModes, board]);
 
   // Modal State
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -32,25 +48,21 @@ function App() {
 
     if (result === 'PROMOTION_NEEDED') {
       setPromotionPending({ fromRow, fromCol, toRow, toCol });
-      setValidMoves([]); // Clear hints on move attempt
       return true;
     }
 
     if (result) {
       updateGameState(result);
-      setValidMoves([]); // Clear hints on successful move
       return true;
     }
     return false;
   };
 
   const handlePieceSelect = (row, col) => {
-    const piece = board[row][col];
-    if (piece && beginnerModes[piece.color]) {
-      const moves = game.getValidMoves(row, col);
-      setValidMoves(moves);
+    if (row === null || col === null) {
+      setSelectedSquare(null);
     } else {
-      setValidMoves([]);
+      setSelectedSquare({ row, col });
     }
   };
 
@@ -84,6 +96,7 @@ function App() {
     setGameStatus('PLAYING');
     setPromotionPending(null);
     setDeadPieces({ [COLORS.WHITE]: [], [COLORS.BLACK]: [] });
+    setSelectedSquare(null);
     setValidMoves([]);
     setShowStatusModal(false);
   };
@@ -97,7 +110,6 @@ function App() {
       ...prev,
       [color]: !prev[color]
     }));
-    setValidMoves([]); // Clear hints on toggle
   };
 
   return (
