@@ -22,6 +22,10 @@ class Game {
             [COLORS.WHITE]: [], // Captured by White (Black pieces)
             [COLORS.BLACK]: []  // Captured by Black (White pieces)
         };
+        this.castlingRights = {
+            [COLORS.WHITE]: { kingSide: true, queenSide: true },
+            [COLORS.BLACK]: { kingSide: true, queenSide: true }
+        };
     }
 
     initializeBoard() {
@@ -106,11 +110,58 @@ class Game {
 
         if (inCheck) return false;
 
-        // 5. Execute move
+        // 5. Save History before execution
+        this.history.push({
+            board: this.board.map(row => row.map(cell => cell ? { ...cell } : null)),
+            turn: this.turn,
+            status: this.status,
+            deadPieces: {
+                [COLORS.WHITE]: [...this.deadPieces[COLORS.WHITE]],
+                [COLORS.BLACK]: [...this.deadPieces[COLORS.BLACK]]
+            },
+            castlingRights: {
+                [COLORS.WHITE]: { ...this.castlingRights[COLORS.WHITE] },
+                [COLORS.BLACK]: { ...this.castlingRights[COLORS.BLACK] }
+            }
+        });
+
+        // 6. Execute move
         if (target) {
             // Capture logic
-            // Add target to the *current player's* collection of dead pieces
             this.deadPieces[this.turn].push(target);
+            // If dragging rook captured, deny their castling rights for it
+            if (target.type === PIECES.ROOK) {
+                if (target.color === COLORS.WHITE && toRow === 7) {
+                    if (toCol === 0) this.castlingRights[COLORS.WHITE].queenSide = false;
+                    if (toCol === 7) this.castlingRights[COLORS.WHITE].kingSide = false;
+                } else if (target.color === COLORS.BLACK && toRow === 0) {
+                    if (toCol === 0) this.castlingRights[COLORS.BLACK].queenSide = false;
+                    if (toCol === 7) this.castlingRights[COLORS.BLACK].kingSide = false;
+                }
+            }
+        }
+
+        // Handle Castling Move internally: King moved two spots
+        if (piece.type === PIECES.KING && Math.abs(toCol - fromCol) === 2) {
+            const isKingSide = toCol === 6;
+            const rookFromCol = isKingSide ? 7 : 0;
+            const rookToCol = isKingSide ? 5 : 3;
+            const rook = this.board[fromRow][rookFromCol];
+            
+            // Move Rook
+            this.board[fromRow][rookToCol] = rook;
+            this.board[fromRow][rookFromCol] = null;
+            
+            // Note: moving the king is done below as standard
+        }
+
+        // Update castling rights (move King or Rook strips rights)
+        if (piece.type === PIECES.KING) {
+            this.castlingRights[piece.color].kingSide = false;
+            this.castlingRights[piece.color].queenSide = false;
+        } else if (piece.type === PIECES.ROOK) {
+            if (fromCol === 0) this.castlingRights[piece.color].queenSide = false;
+            if (fromCol === 7) this.castlingRights[piece.color].kingSide = false;
         }
 
         this.board[toRow][toCol] = piece;
@@ -121,11 +172,11 @@ class Game {
             this.board[toRow][toCol] = { type: promotionPieceType, color: piece.color };
         }
 
-        // 6. Switch turn
+        // 7. Switch turn
         const nextTurn = this.turn === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE;
         this.turn = nextTurn;
 
-        // 7. Check Game State
+        // 8. Check Game State
         if (this.isInCheck(nextTurn)) {
             if (this.isCheckmate(nextTurn)) {
                 this.status = 'CHECKMATE';
@@ -137,6 +188,19 @@ class Game {
         }
 
         return this.status;
+    }
+
+    undo() {
+        if (this.history.length === 0) return false;
+
+        const lastState = this.history.pop();
+        this.board = lastState.board;
+        this.turn = lastState.turn;
+        this.status = lastState.status;
+        this.deadPieces = lastState.deadPieces;
+        this.castlingRights = lastState.castlingRights;
+
+        return true;
     }
 
     isInCheck(color) {
@@ -281,8 +345,45 @@ class Game {
     validateKing(fromRow, fromCol, toRow, toCol) {
         const dx = Math.abs(toCol - fromCol);
         const dy = Math.abs(toRow - fromRow);
-        return dx <= 1 && dy <= 1;
-        // Castling (TODO)
+        
+        // Standard Move
+        if (dx <= 1 && dy <= 1) return true;
+
+        // Castling
+        const piece = this.board[fromRow][fromCol];
+        if (dy === 0 && dx === 2) {
+            // King must not be currently in check
+            if (this.isInCheck(piece.color)) return false;
+
+            const isKingSide = (toCol === 6);
+            if (isKingSide) {
+                if (!this.castlingRights[piece.color].kingSide) return false;
+                // Path clear between king and rook?
+                if (this.board[fromRow][5] || this.board[fromRow][6]) return false;
+                // Rook must exist at fromRow, 7 and be a rook of same color
+                const rook = this.board[fromRow][7];
+                if (!rook || rook.type !== PIECES.ROOK || rook.color !== piece.color) return false;
+                // Squares King passes through cannot be under attack
+                if (this.isUnderAttack(fromRow, 5, piece.color === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE)) return false;
+                // toCol (6) check is implicitly handled in move() validation via simulation
+                return true;
+            } else {
+                // QueenSide Castling
+                if (!this.castlingRights[piece.color].queenSide) return false;
+                // Path clear between king and rook?
+                if (this.board[fromRow][1] || this.board[fromRow][2] || this.board[fromRow][3]) return false;
+                const rook = this.board[fromRow][0];
+                if (!rook || rook.type !== PIECES.ROOK || rook.color !== piece.color) return false;
+                // Squares King passes through cannot be under attack
+                if (this.isUnderAttack(fromRow, 3, piece.color === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE)) return false;
+                // Note: b1 (fromRow, 1) doesn't need to be checked for "under attack" for castling rules, only transit squares (c1, d1 / 2, 3)
+                // However the king moves two squares to c1, so he passes through d1.
+                // Wait col 3 is d1, col 2 is c1. King goes e1 (4) -> c1 (2), passing through d1 (3)
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     getValidMoves(fromRow, fromCol) {
@@ -321,6 +422,10 @@ class Game {
         this.deadPieces = {
             [COLORS.WHITE]: [],
             [COLORS.BLACK]: []
+        };
+        this.castlingRights = {
+            [COLORS.WHITE]: { kingSide: true, queenSide: true },
+            [COLORS.BLACK]: { kingSide: true, queenSide: true }
         };
     }
 }

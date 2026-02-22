@@ -42,7 +42,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: transform 0.2s;
 }
 
 .piece:active {
@@ -60,6 +59,11 @@
     color: black;
     text-shadow: 0px 0px 2px white;
     /* Outline for visibility on dark squares */
+    transform: rotate(180deg);
+}
+
+.piece.b:active {
+    transform: scale(1.1) rotate(180deg);
 }
 
 .hint-dot {

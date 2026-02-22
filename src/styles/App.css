@@ -34,10 +34,12 @@
 
 .side-panel.left {
     justify-content: flex-start; /* Align Black's captures to Top */
+    transform: rotate(180deg);
+    flex-direction: column-reverse;
 }
 
 .side-panel.right {
-    justify-content: flex-end; /* Align White's captures to Bottom */
+    justify-content: flex-end; /* Let bottom-controls sit at bottom, auto margins keep top in middle */
 }
 
 .captured-area {
