@@ -1,6 +1,6 @@
 import React from 'react';
 
-const GameStatusModal = ({ status, onDismiss, onRestart }) => {
+const GameStatusModal = ({ status, onDismiss, onRestart, gameType = 'chess' }) => {
     if (!status || status === 'PLAYING') return null;
 
     // Simple inline styles for modal (similar to PromotionModal)
@@ -52,13 +52,18 @@ const GameStatusModal = ({ status, onDismiss, onRestart }) => {
     };
 
     const isCheck = status === 'CHECK';
-    const title = isCheck ? 'Check!' : 'Checkmate!';
+    const isJanggi = gameType === 'janggi';
+    
+    const title = isCheck 
+        ? (isJanggi ? '장군 (Check)' : 'Check!') 
+        : (isJanggi ? '외통 (Checkmate)' : 'Checkmate!');
+
     const message = isCheck
-        ? 'Your King is in danger.'
-        : 'Game Over. The King is captured.';
+        ? (isJanggi ? 'Your General is in danger.' : 'Your King is in danger.')
+        : (isJanggi ? 'Game Over. The General is captured.' : 'Game Over. The King is captured.');
 
     const infoMessage = isCheck
-        ? 'You must move your King or block the attack.'
+        ? (isJanggi ? 'You must move your General or block the attack.' : 'You must move your King or block the attack.')
         : '';
 
     return (
