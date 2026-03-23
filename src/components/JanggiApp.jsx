@@ -117,15 +117,14 @@ function JanggiApp() {
   return (
     <div className="game-area">
       <div className="side-panel left">
-          <div className="beginner-toggle top">
-              <label>
-                  <input
-                      type="checkbox"
-                      checked={beginnerModes[COLORS.HAN]}
-                      onChange={() => toggleBeginnerMode(COLORS.HAN)}
-                  />
-                  <br/>Beginner Mode (Red)
-              </label>
+          <div className="beginner-toggle top" style={{ textAlign: 'center' }}>
+              <input
+                  type="checkbox"
+                  checked={beginnerModes[COLORS.HAN]}
+                  onChange={() => toggleBeginnerMode(COLORS.HAN)}
+              />
+              <br/>
+              <span>Beginner Mode (Red)</span>
           </div>
           <div className="captured-area top">
               {/* Top Left: Red (Han) captures Blue (Cho) pieces */}
@@ -166,15 +165,14 @@ function JanggiApp() {
               </div>
           </div>
           <div className="bottom-controls" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div className="beginner-toggle bottom">
-                  <label>
-                      <input
-                          type="checkbox"
-                          checked={beginnerModes[COLORS.CHO]}
-                          onChange={() => toggleBeginnerMode(COLORS.CHO)}
-                      />
-                      <br/>Beginner Mode (Blue)
-                  </label>
+              <div className="beginner-toggle bottom" style={{ textAlign: 'center' }}>
+                  <input
+                      type="checkbox"
+                      checked={beginnerModes[COLORS.CHO]}
+                      onChange={() => toggleBeginnerMode(COLORS.CHO)}
+                  />
+                  <br/>
+                  <span>Beginner Mode (Blue)</span>
               </div>
               <div className="captured-area bottom">
                   {/* Bottom Right: Blue (Cho) captures Red (Han) pieces */}

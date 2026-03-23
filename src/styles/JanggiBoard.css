@@ -1,9 +1,11 @@
 /* JanggiBoard.css */
 .janggi-board-container {
     position: relative;
-    width: 440px; /* 8 boxes * 55px */
-    height: 495px; /* 9 boxes * 55px */
-    margin: 30px;
+    --board-width: min(700px, calc(100vw - 280px), calc((100vh - 200px) * 8 / 9));
+    --cell-size: calc(var(--board-width) / 8);
+    width: var(--board-width);
+    height: calc(9 * var(--cell-size));
+    margin: 0;
     background-color: #f1daac; /* Wood color */
     border: 2px solid #5c3a21;
     box-sizing: content-box;
@@ -42,19 +44,19 @@
 /* Interactive layer on top */
 .janggi-intersections {
     position: absolute;
-    top: -27.5px; /* -half cell height */
-    left: -27.5px; /* -half cell width */
-    width: 495px; /* 9 columns * 55px */
-    height: 550px; /* 10 rows * 55px */
+    top: calc(-0.5 * var(--cell-size));
+    left: calc(-0.5 * var(--cell-size));
+    width: calc(9 * var(--cell-size));
+    height: calc(10 * var(--cell-size));
     display: grid;
-    grid-template-columns: repeat(9, 55px);
-    grid-template-rows: repeat(10, 55px);
+    grid-template-columns: repeat(9, var(--cell-size));
+    grid-template-rows: repeat(10, var(--cell-size));
     pointer-events: none; /* Let clicks pass to children */
 }
 
 .janggi-intersection {
-    width: 55px;
-    height: 55px;
+    width: var(--cell-size);
+    height: var(--cell-size);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -66,8 +68,8 @@
 .janggi-intersection.selected::before {
     content: '';
     position: absolute;
-    width: 45px;
-    height: 45px;
+    width: calc(0.85 * var(--cell-size));
+    height: calc(0.85 * var(--cell-size));
     background-color: rgba(255, 255, 0, 0.4);
     border-radius: 50%;
     z-index: 1;
@@ -75,11 +77,12 @@
 
 .janggi-hint-dot {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    background-color: rgba(0, 0, 0, 0.3);
+    width: calc(0.3 * var(--cell-size));
+    height: calc(0.3 * var(--cell-size));
+    background-color: rgba(255, 0, 0, 0.5); /* Transparent red */
     border-radius: 50%;
-    z-index: 2;
+    z-index: 4; /* Above the piece */
+    pointer-events: none;
 }
 
 /* Pieces */
@@ -114,19 +117,19 @@
 }
 
 .janggi-piece.large {
-    width: 48px;
-    height: 48px;
-    font-size: 28px;
+    width: calc(0.85 * var(--cell-size));
+    height: calc(0.85 * var(--cell-size));
+    font-size: calc(0.5 * var(--cell-size));
 }
 
 .janggi-piece.medium {
-    width: 42px;
-    height: 42px;
-    font-size: 24px;
+    width: calc(0.75 * var(--cell-size));
+    height: calc(0.75 * var(--cell-size));
+    font-size: calc(0.45 * var(--cell-size));
 }
 
 .janggi-piece.small {
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
+    width: calc(0.65 * var(--cell-size));
+    height: calc(0.65 * var(--cell-size));
+    font-size: calc(0.4 * var(--cell-size));
 }
