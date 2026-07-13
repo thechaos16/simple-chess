@@ -26,6 +26,7 @@ class Game {
             [COLORS.WHITE]: { kingSide: true, queenSide: true },
             [COLORS.BLACK]: { kingSide: true, queenSide: true }
         };
+        this.enPassantTarget = null;
     }
 
     initializeBoard() {
@@ -97,16 +98,32 @@ class Game {
         }
 
         // 4. Ensure move doesn't put own King in check
-        // Simulate move
+        // Determine if it is en passant
         const target = this.board[toRow][toCol];
+        const isEnPassant = piece.type === PIECES.PAWN &&
+                            fromCol !== toCol &&
+                            !target &&
+                            this.enPassantTarget &&
+                            toRow === this.enPassantTarget.row &&
+                            toCol === this.enPassantTarget.col;
+
+        const epCapturedPiece = isEnPassant ? this.board[fromRow][toCol] : null;
+
+        // Simulate move
         this.board[toRow][toCol] = piece;
         this.board[fromRow][fromCol] = null;
+        if (isEnPassant) {
+            this.board[fromRow][toCol] = null;
+        }
 
         const inCheck = this.isInCheck(this.turn);
 
         // Undo move
         this.board[fromRow][fromCol] = piece;
         this.board[toRow][toCol] = target;
+        if (isEnPassant) {
+            this.board[fromRow][toCol] = epCapturedPiece;
+        }
 
         if (inCheck) return false;
 
@@ -122,19 +139,26 @@ class Game {
             castlingRights: {
                 [COLORS.WHITE]: { ...this.castlingRights[COLORS.WHITE] },
                 [COLORS.BLACK]: { ...this.castlingRights[COLORS.BLACK] }
-            }
+            },
+            enPassantTarget: this.enPassantTarget ? { ...this.enPassantTarget } : null
         });
 
         // 6. Execute move
-        if (target) {
+        let capturedPiece = target;
+        if (isEnPassant) {
+            capturedPiece = this.board[fromRow][toCol];
+            this.board[fromRow][toCol] = null;
+        }
+
+        if (capturedPiece) {
             // Capture logic
-            this.deadPieces[this.turn].push(target);
+            this.deadPieces[this.turn].push(capturedPiece);
             // If dragging rook captured, deny their castling rights for it
-            if (target.type === PIECES.ROOK) {
-                if (target.color === COLORS.WHITE && toRow === 7) {
+            if (capturedPiece.type === PIECES.ROOK) {
+                if (capturedPiece.color === COLORS.WHITE && toRow === 7) {
                     if (toCol === 0) this.castlingRights[COLORS.WHITE].queenSide = false;
                     if (toCol === 7) this.castlingRights[COLORS.WHITE].kingSide = false;
-                } else if (target.color === COLORS.BLACK && toRow === 0) {
+                } else if (capturedPiece.color === COLORS.BLACK && toRow === 0) {
                     if (toCol === 0) this.castlingRights[COLORS.BLACK].queenSide = false;
                     if (toCol === 7) this.castlingRights[COLORS.BLACK].kingSide = false;
                 }
@@ -172,6 +196,16 @@ class Game {
             this.board[toRow][toCol] = { type: promotionPieceType, color: piece.color };
         }
 
+        // Set new enPassantTarget for the next turn
+        if (piece.type === PIECES.PAWN && Math.abs(toRow - fromRow) === 2) {
+            this.enPassantTarget = {
+                row: (fromRow + toRow) / 2,
+                col: fromCol
+            };
+        } else {
+            this.enPassantTarget = null;
+        }
+
         // 7. Switch turn
         const nextTurn = this.turn === COLORS.WHITE ? COLORS.BLACK : COLORS.WHITE;
         this.turn = nextTurn;
@@ -199,6 +233,7 @@ class Game {
         this.status = lastState.status;
         this.deadPieces = lastState.deadPieces;
         this.castlingRights = lastState.castlingRights;
+        this.enPassantTarget = lastState.enPassantTarget;
 
         return true;
     }
@@ -316,7 +351,14 @@ class Game {
         // Capture
         if (dx === 1 && dy === direction && target && target.color !== color) return true;
 
-        // En Passant (TODO)
+        // En Passant
+        if (dx === 1 && dy === direction && !target && this.enPassantTarget && 
+            this.enPassantTarget.row === toRow && this.enPassantTarget.col === toCol) {
+            const enemyPawn = this.board[fromRow][toCol];
+            if (enemyPawn && enemyPawn.type === PIECES.PAWN && enemyPawn.color !== color) {
+                return true;
+            }
+        }
 
         return false;
     }
@@ -396,14 +438,28 @@ class Game {
                 if (this.isValidMove(fromRow, fromCol, r, c, piece)) {
                     // Simulate move to ensure no self-check
                     const target = this.board[r][c];
+                    const isEnPassant = piece.type === PIECES.PAWN &&
+                                        fromCol !== c &&
+                                        !target &&
+                                        this.enPassantTarget &&
+                                        r === this.enPassantTarget.row &&
+                                        c === this.enPassantTarget.col;
+                    const epCapturedPiece = isEnPassant ? this.board[fromRow][c] : null;
+
                     this.board[r][c] = piece;
                     this.board[fromRow][fromCol] = null;
+                    if (isEnPassant) {
+                        this.board[fromRow][c] = null;
+                    }
 
                     const inCheck = this.isInCheck(this.turn);
 
                     // Undo
                     this.board[fromRow][fromCol] = piece;
                     this.board[r][c] = target;
+                    if (isEnPassant) {
+                        this.board[fromRow][c] = epCapturedPiece;
+                    }
 
                     if (!inCheck) {
                         validMoves.push({ row: r, col: c });
@@ -427,6 +483,7 @@ class Game {
             [COLORS.WHITE]: { kingSide: true, queenSide: true },
             [COLORS.BLACK]: { kingSide: true, queenSide: true }
         };
+        this.enPassantTarget = null;
     }
 }
 
